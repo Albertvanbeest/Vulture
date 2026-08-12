@@ -9,12 +9,12 @@ const leaveBtn = document.getElementById("leaveBtn");
 
 const MENU_BACKGROUND_VIDEO = "preview.mp4";
 const PLAYLIST = ["Final Are you a vulture.mov"];
-const WATCH_PROMPT_EVERY_SECONDS = 60;
+const WATCH_PROMPT_TIMES = [56, 101, 157];
 
 let currentVideoIndex = -1;
 let isWatchPromptOpen = false;
 let isMovieMode = false;
-let nextWatchPromptTime = WATCH_PROMPT_EVERY_SECONDS;
+let nextWatchPromptIndex = 0;
 
 function showMenu() {
   menuScreen.classList.remove("is-hidden");
@@ -26,7 +26,7 @@ function hideMenu() {
 
 function resetCheckpointState() {
   isWatchPromptOpen = false;
-  nextWatchPromptTime = WATCH_PROMPT_EVERY_SECONDS;
+  nextWatchPromptIndex = 0;
   watchCheck.hidden = true;
 }
 
@@ -118,7 +118,7 @@ async function startNextVideo() {
 
 async function openWatchPrompt(message) {
   isWatchPromptOpen = true;
-  watchCheckMessage.textContent = message || "Are you still watching?";
+  watchCheckMessage.textContent = message || "Do you still want to watch?";
 
   if (document.fullscreenElement && typeof document.exitFullscreen === "function") {
     try {
@@ -153,9 +153,12 @@ player.addEventListener("timeupdate", () => {
     return;
   }
 
-  if (player.currentTime >= nextWatchPromptTime) {
-    nextWatchPromptTime += WATCH_PROMPT_EVERY_SECONDS;
-    void openWatchPrompt("Are you still watching?");
+  if (
+    nextWatchPromptIndex < WATCH_PROMPT_TIMES.length &&
+    player.currentTime >= WATCH_PROMPT_TIMES[nextWatchPromptIndex]
+  ) {
+    nextWatchPromptIndex += 1;
+    void openWatchPrompt("Do you still want to watch?");
   }
 });
 

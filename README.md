@@ -7,7 +7,7 @@ The app now does this:
 - Shows a main menu with only one button: `Play`.
 - Uses a fullscreen background video behind the menu.
 - On each `Play` click, starts the next video in the playlist (fullscreen).
-- At configured timestamps, pauses and asks: "Are you still watching?"
+- At 0:56, 1:41, and 2:37, pauses and asks: "Do you still want to watch?"
 - If `Yes`, playback resumes.
 - If `No`, it tries to close the site (`window.close()`).
 
@@ -15,12 +15,12 @@ Edit `script.js` to configure your files:
 
 - `MENU_BACKGROUND_VIDEO`: menu background video path.
 - `PLAYLIST`: videos to play when `Play` is clicked.
-- `WATCH_PROMPT_EVERY_SECONDS`: how often the watch prompt appears.
+- `WATCH_PROMPT_TIMES`: video timestamps where the watch prompt appears.
 
-Example interval:
+Example timestamps:
 
 ```js
-const WATCH_PROMPT_EVERY_SECONDS = 60;
+const WATCH_PROMPT_TIMES = [56, 101, 157];
 ```
 
 Note: browsers only allow `window.close()` reliably for tabs opened by script.
