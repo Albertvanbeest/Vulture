@@ -15,15 +15,25 @@ Edit `script.js` to configure your files:
 
 - `MENU_BACKGROUND_VIDEO`: menu background video path.
 - `PLAYLIST`: videos to play when `Play` is clicked.
-- `WATCH_CHECKPOINTS`: array of timestamp/message objects.
+- `WATCH_PROMPT_EVERY_SECONDS`: how often the watch prompt appears.
 
-Example checkpoint format:
+Example interval:
 
 ```js
-const WATCH_CHECKPOINTS = [
-	{ time: 90, message: "Are you still watching?" },
-	{ time: 240, message: "Still there? Press Yes to continue." }
-];
+const WATCH_PROMPT_EVERY_SECONDS = 60;
 ```
 
 Note: browsers only allow `window.close()` reliably for tabs opened by script.
+
+## Publish to GitHub Pages
+
+This repository includes a workflow at `.github/workflows/pages.yml` that deploys automatically from the `main` branch.
+
+1. Push your latest changes to `main`.
+2. In GitHub, open repository Settings -> Pages.
+3. Under Build and deployment, set Source to `GitHub Actions`.
+4. Wait for the `Deploy static site to GitHub Pages` workflow to complete.
+5. Your site will be live at:
+   `https://albertvanbeest.github.io/Vulture/`
+
+Because videos are tracked with Git LFS, the workflow checks out LFS files before deployment so media is included.
