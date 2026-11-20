@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <title>BURDEN — Interactive Experience</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --white: #f2f2f2;
+      --muted: #9a9a9a;
+      --red: #f12d3e;
+      --screen-width: min(100vw, 177.7778vh);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      background: #000;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: var(--white);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button { font: inherit; }
+
+    #stage {
+      position: relative;
+      width: var(--screen-width);
+      max-height: 100vh;
+      max-height: 100dvh;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      isolation: isolate;
+      background:
+        radial-gradient(ellipse at 50% 46%, #111 0%, #050505 58%, #000 100%);
+      box-shadow: 0 0 70px #000;
+    }
+
+    #film {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #film.is-playing { opacity: 1; }
+
+    #stage:has(#film.is-playing) .crt,
+    #stage:has(#film.is-playing) .grain,
+    #stage:has(#film.is-playing) .vhs,
+    #stage:has(#film.is-playing) .brand { display: none; }
+
+    .crt {
+      position: absolute;
+      z-index: 4;
+      inset: 0;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 2px,
+          rgba(0, 0, 0, .22) 3px,
+          rgba(0, 0, 0, .22) 4px
+        );
+      opacity: .48;
+    }
+
+    .grain {
+      position: absolute;
+      z-index: 5;
+      inset: -50%;
+      pointer-events: none;
+      opacity: .09;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+      animation: grain-shift .22s steps(2) infinite;
+    }
+
+    .vhs {
+      position: absolute;
+      z-index: 7;
+      top: 5.2%;
+      left: 5.2%;
+      color: var(--white);
+      font: 700 clamp(10px, 1.2vw, 16px)/1.2 "Courier New", monospace;
+      letter-spacing: .12em;
+      text-shadow: 1px 0 #f33, -1px 0 #58d8ff;
+    }
+
+    .brand {
+      position: absolute;
+      z-index: 6;
+      top: 7.5%;
+      left: 50%;
+      width: 90%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+
+    .brand-name {
+      color: var(--white);
+      font: 900 clamp(18px, 2.4vw, 30px)/1.15 "Courier New", monospace;
+      letter-spacing: .25em;
+      text-shadow: 2px 0 #f34, -2px 0 #55d5ff, 0 0 14px rgba(255,255,255,.25);
+    }
+
+    .brand-tagline {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: clamp(8px, 1.05vw, 13px);
+      letter-spacing: .34em;
+    }
+
+    .screen {
+      position: absolute;
+      z-index: 3;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18% 7% 9%;
+      text-align: center;
+      background: rgba(0, 0, 0, .94);
+    }
+
+    .screen.active { display: flex; }
+    .screen h1, .screen p { margin: 0; }
+
+    .content {
+      width: min(100%, 940px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(12px, 2.1vh, 23px);
+    }
+
+    .line, .choices {
+      opacity: 0;
+      animation: fade-in .75s ease-out forwards;
+      animation-delay: var(--delay, 0s);
+    }
+
+    .glow {
+      color: var(--white);
+      text-shadow: 1.5px 0 rgba(255, 55, 75, .48), -1.5px 0 rgba(65, 212, 255, .4);
+    }
+
+    .warning-title, .tw-line {
+      color: var(--red);
+      font-family: "Courier New", monospace;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-shadow: 2px 0 #600, -2px 0 #620b16, 0 0 22px rgba(241, 45, 62, .5);
+    }
+
+    .screen .warning-title {
+      margin-bottom: clamp(7px, 1.4vh, 16px);
+      font-size: clamp(31px, 6vw, 72px);
+      line-height: 1;
+    }
+
+    .body-copy {
+      max-width: 900px;
+      font-size: clamp(17px, 2.8vw, 36px);
+      line-height: 1.3;
+    }
+
+    .opening-copy { gap: clamp(7px, 1.2vh, 13px); }
+    .opening-copy .body-copy { font-size: clamp(15px, 2.3vw, 27px); }
+    .opening-copy .consent-copy { margin-top: clamp(7px, 1.4vh, 16px); }
+
+    .screen .continue-label {
+      margin-top: -5px;
+      font-size: clamp(17px, 2.8vw, 36px);
+    }
+
+    .tw-line {
+      max-width: 100%;
+      font-size: clamp(20px, 3.2vw, 40px);
+      line-height: 1.25;
+    }
+
+    .choices {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(26px, 5vw, 64px);
+      margin-top: clamp(3px, 1vh, 12px);
+      animation-delay: .95s;
+    }
+
+    .choice {
+      min-width: 110px;
+      padding: 9px 13px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--white);
+      cursor: pointer;
+      font-size: clamp(19px, 2.2vw, 27px);
+      letter-spacing: .08em;
+      text-shadow: 1px 0 rgba(255, 55, 75, .5), -1px 0 rgba(65, 212, 255, .45);
+      transition: color .15s ease, border-color .15s ease, text-shadow .15s ease;
+    }
+
+    .choice:hover, .choice:focus-visible {
+      outline: none;
+      border-color: rgba(241, 45, 62, .8);
+      color: #fff;
+      text-shadow: 0 0 12px var(--red), 1px 0 #f34, -1px 0 #55d5ff;
+    }
+
+    .accept {
+      margin-top: clamp(20px, 4vh, 42px);
+      padding: 10px 14px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--white);
+      cursor: pointer;
+      font-size: clamp(18px, 2.4vw, 30px);
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-shadow: 1px 0 rgba(255, 55, 75, .5), -1px 0 rgba(65, 212, 255, .45);
+      animation-delay: 1.45s;
+    }
+
+    .accept:hover, .accept:focus-visible {
+      outline: 1px solid var(--red);
+      text-shadow: 0 0 12px var(--red), 1px 0 #f34, -1px 0 #55d5ff;
+    }
+
+    .closing-copy { gap: clamp(14px, 2.6vh, 27px); }
+    .closing-copy .body-copy { font-size: clamp(17px, 2.3vw, 29px); }
+    .end-copy { gap: clamp(12px, 2.1vh, 23px); }
+
+    .error-message {
+      position: absolute;
+      z-index: 10;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 10%;
+      background: #000;
+      text-align: center;
+      color: var(--white);
+      line-height: 1.6;
+    }
+
+    .error-message.active { display: flex; }
+
+    .error-message strong {
+      display: block;
+      margin-bottom: 12px;
+      color: var(--red);
+      font: 700 clamp(18px, 2.5vw, 30px) "Courier New", monospace;
+      letter-spacing: .1em;
+    }
+
+    .error-message p { margin: 0; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes grain-shift {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(1%, -1%); }
+      50% { transform: translate(-1%, 1%); }
+      75% { transform: translate(1%, 1%); }
+      100% { transform: translate(-1%, -1%); }
+    }
+
+    @media (max-aspect-ratio: 4 / 3) {
+      .screen { padding: 21% 6% 8%; }
+      .brand { top: 6%; }
+      .body-copy { font-size: clamp(17px, 4vw, 31px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="stage" aria-label="BURDEN interactive film">
+    <video id="film" playsinline preload="metadata" disablepictureinpicture controlslist="nodownload noplaybackrate nofullscreen">
+      <source src="Burden(2026).mp4" type="video/mp4">
+    </video>
+    <div class="vhs" id="vhs-label" aria-hidden="true">PAUSE</div>
+    <header class="brand" aria-label="BURDEN, a film inspired by Kevin Carter">
+      <div class="brand-name">BURDEN</div>
+      <div class="brand-tagline">A FILM INSPIRED BY KEVIN CARTER</div>
+    </header>
+
+    <section class="screen active" id="opening" aria-labelledby="warning-title">
+      <div class="content opening-copy">
+        <h1 class="warning-title line" id="warning-title" style="--delay:0s">WARNING</h1>
+        <p class="body-copy glow line" style="--delay:.15s">This experience contains depictions of human suffering and psychological trauma.</p>
+        <p class="body-copy glow line" style="--delay:.3s">Each step forward requires your consent.</p>
+        <p class="body-copy glow line" style="--delay:.45s">You are responsible for what you choose to see.</p>
+        <p class="body-copy glow line consent-copy" style="--delay:.65s">You are about to witness suffering.</p>
+        <p class="body-copy glow line" style="--delay:.8s">You will carry it.</p>
+        <button class="accept line" id="accept" type="button" style="--delay:1.1s">▶ [ I ACCEPT ]</button>
+      </div>
+    </section>
+
+    <section class="screen" id="prompt-photo" aria-labelledby="photo-copy" aria-hidden="true">
+      <div class="content">
+        <p class="body-copy glow line" id="photo-copy" style="--delay:0s">You are about to witness the exploitation of a suffering child.</p>
+        <p class="continue-label glow line" style="--delay:.2s">Continue?</p>
+        <div class="choices line" role="group" aria-label="Continue or stop">
+          <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">▶ YES</button>
+          <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">▶ NO</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="prompt-burden" aria-labelledby="burden-copy" aria-hidden="true">
+      <div class="content">
+        <p class="body-copy glow line" id="burden-copy" style="--delay:0s">You are about to witness the burden.</p>
+        <p class="continue-label glow line" style="--delay:.2s">Continue?</p>
+        <div class="choices line" role="group" aria-label="Continue or stop">
+          <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">▶ YES</button>
+          <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">▶ NO</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="prompt-tw" aria-labelledby="tw-copy" aria-hidden="true">
+      <div class="content">
+        <p class="tw-line line" id="tw-copy" style="--delay:0s">TW: Contains death by suicide.</p>
+        <p class="continue-label glow line" style="--delay:.2s">Continue?</p>
+        <div class="choices line" role="group" aria-label="Continue or stop">
+          <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">▶ YES</button>
+          <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">▶ NO</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="ending" aria-labelledby="ending-copy" aria-hidden="true">
+      <div class="content end-copy">
+        <p class="body-copy glow line" id="ending-copy" style="--delay:0s">Would you like to begin the cycle again?</p>
+        <p class="continue-label glow line" style="--delay:.2s">Continue?</p>
+        <div class="choices line" role="group" aria-label="Begin the cycle again or end">
+          <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">▶ YES</button>
+          <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">▶ NO</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="closing" aria-labelledby="closing-copy" aria-hidden="true">
+      <div class="content closing-copy">
+        <p class="body-copy glow line" id="closing-copy" style="--delay:0s">BURDEN is about the cycle of exploitation and the burden of witnessing suffering.</p>
+        <p class="body-copy glow line" style="--delay:.3s">By choosing not to continue, you stepped out of that cycle.</p>
+      </div>
+    </section>
+
+    <section class="screen" id="cycle-ended" aria-labelledby="cycle-copy" aria-hidden="true">
+      <div class="content">
+        <p class="body-copy glow line" id="cycle-copy" style="--delay:0s">The cycle continues without you.</p>
+      </div>
+    </section>
+
+    <section class="error-message" id="media-error" role="alert">
+      <div>
+        <strong>FILM UNAVAILABLE</strong>
+        <p id="media-error-text">The film could not be loaded. Check that Burden(2026).mp4 is next to this HTML file, then reload the page.</p>
+      </div>
+    </section>
+    <div class="crt" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <p class="sr-only" id="status" aria-live="polite">Opening warning. Choose I accept to begin.</p>
+  </main>
+
+  <script>
+    (() => {
+      const film = document.getElementById("film");
+      const vhs = document.getElementById("vhs-label");
+      const status = document.getElementById("status");
+      const mediaError = document.getElementById("media-error");
+      const mediaErrorText = document.getElementById("media-error-text");
+      const screens = [...document.querySelectorAll(".screen")];
+      const cuts = [
+        { time: 54.5, screen: "prompt-photo", name: "before the photograph" },
+        { time: 101, screen: "prompt-burden", name: "before the burden" },
+        { time: 150.7, screen: "prompt-tw", name: "before the final sequence" }
+      ];
+      let state = "opening";
+      let cutIndex = 0;
+      let resetTimer = 0;
+      let cutWatcher = 0;
+      let gatePending = false;
+
+      function showScreen(id, label, tapeState) {
+        screens.forEach((screen) => {
+          const active = screen.id === id;
+          screen.classList.toggle("active", active);
+          screen.setAttribute("aria-hidden", String(!active));
+          if (active) {
+            screen.classList.remove("active");
+            void screen.offsetWidth;
+            screen.classList.add("active");
+          }
+        });
+        vhs.textContent = tapeState;
+        status.textContent = label;
+      }
+
+      function showError(message) {
+        window.clearTimeout(resetTimer);
+        window.clearInterval(cutWatcher);
+        film.pause();
+        film.classList.remove("is-playing");
+        mediaErrorText.textContent = message;
+        mediaError.classList.add("active");
+        state = "error";
+        vhs.textContent = "STOP";
+        status.textContent = "Film unavailable. " + message;
+      }
+
+      function waitFor(target) {
+        return new Promise((resolve, reject) => {
+          const onReady = () => {
+            cleanup();
+            resolve();
+          };
+          const onError = () => {
+            cleanup();
+            reject(new Error("The film could not be loaded. Check that Burden(2026).mp4 is next to this HTML file, then reload the page."));
+          };
+          const cleanup = () => {
+            film.removeEventListener(target, onReady);
+            film.removeEventListener("error", onError);
+          };
+          film.addEventListener(target, onReady, { once: true });
+          film.addEventListener("error", onError, { once: true });
+        });
+      }
+
+      function seekTo(time) {
+        return new Promise((resolve, reject) => {
+          const cleanup = () => {
+            film.removeEventListener("seeked", onSeeked);
+            film.removeEventListener("error", onError);
+          };
+          const onSeeked = () => {
+            cleanup();
+            resolve();
+          };
+          const onError = () => {
+            cleanup();
+            reject(new Error("The film could not seek to the required timecode."));
+          };
+          film.addEventListener("seeked", onSeeked, { once: true });
+          film.addEventListener("error", onError, { once: true });
+          try {
+            film.currentTime = time;
+            if (!film.seeking) {
+              cleanup();
+              resolve();
+            }
+          } catch (error) {
+            cleanup();
+            reject(error);
+          }
+        });
+      }
+
+      async function playFrom(time) {
+        window.clearTimeout(resetTimer);
+        window.clearInterval(cutWatcher);
+        gatePending = false;
+        mediaError.classList.remove("active");
+        screens.forEach((screen) => {
+          screen.classList.remove("active");
+          screen.setAttribute("aria-hidden", "true");
+        });
+        state = "playing";
+        film.classList.add("is-playing");
+        vhs.textContent = "PLAY";
+        status.textContent = "Film playing.";
+
+        try {
+          if (film.readyState < 1) await waitFor("loadedmetadata");
+          if (Math.abs(film.currentTime - time) > .04) await seekTo(time);
+          await film.play();
+          cutWatcher = window.setInterval(() => {
+            if (state === "playing" && cutIndex < cuts.length && film.currentTime >= cuts[cutIndex].time) {
+              reachCut(cutIndex);
+            }
+          }, 20);
+        } catch (error) {
+          showError(error.message || "Playback failed. Reload the page and try again.");
+        }
+      }
+
+      function reachCut(index) {
+        if (state !== "playing" || gatePending || index !== cutIndex) return;
+        gatePending = true;
+        window.clearInterval(cutWatcher);
+        const cut = cuts[index];
+        film.pause();
+        const revealPrompt = () => {
+          if (state !== "playing") return;
+          gatePending = false;
+          cutIndex += 1;
+          film.classList.remove("is-playing");
+          state = cut.screen;
+          showScreen(cut.screen, "Paused " + cut.name + ". Choose yes or no.", "PAUSE");
+          document.querySelector("#" + cut.screen + " [data-choice='yes']").focus();
+        };
+        if (Math.abs(film.currentTime - cut.time) > .02) {
+          seekTo(cut.time).then(revealPrompt).catch((error) => showError(error.message));
+        } else {
+          revealPrompt();
+        }
+      }
+
+      function noToFilm() {
+        window.clearInterval(cutWatcher);
+        film.pause();
+        film.classList.remove("is-playing");
+        film.currentTime = 0;
+        state = "closing";
+        showScreen("closing", "Closing statement. The experience will reset shortly.", "STOP");
+        resetTimer = window.setTimeout(resetToOpening, 8000);
+      }
+
+      function resetToOpening() {
+        window.clearTimeout(resetTimer);
+        window.clearInterval(cutWatcher);
+        film.pause();
+        film.classList.remove("is-playing");
+        if (film.readyState >= 1) film.currentTime = 0;
+        cutIndex = 0;
+        state = "opening";
+        showScreen("opening", "Opening warning. Choose I accept to begin.", "PAUSE");
+        document.getElementById("accept").focus();
+      }
+
+      document.getElementById("accept").addEventListener("click", () => {
+        cutIndex = 0;
+        playFrom(0);
+      });
+
+      document.querySelectorAll("[data-choice]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const choice = button.dataset.choice;
+          if (state === "ending") {
+            if (choice === "yes") {
+              resetToOpening();
+            } else {
+              state = "cycle-ended";
+              showScreen("cycle-ended", "The cycle continues without you.", "STOP");
+              resetTimer = window.setTimeout(resetToOpening, 5000);
+            }
+            return;
+          }
+          if (!cuts.some((cut) => cut.screen === state)) return;
+          if (choice === "no") {
+            noToFilm();
+          } else {
+            const previousCut = cuts[cutIndex - 1];
+            playFrom(previousCut.time);
+          }
+        });
+      });
+
+      film.addEventListener("timeupdate", () => {
+        if (state === "playing" && cutIndex < cuts.length && film.currentTime >= cuts[cutIndex].time) {
+          reachCut(cutIndex);
+        }
+      });
+
+      film.addEventListener("ended", () => {
+        if (state !== "playing") return;
+        window.clearInterval(cutWatcher);
+        film.classList.remove("is-playing");
+        state = "ending";
+        showScreen("ending", "Film complete. Choose whether to begin the cycle again.", "STOP");
+        document.querySelector("#ending [data-choice='yes']").focus();
+      });
+
+      film.addEventListener("error", () => {
+        if (state !== "error") showError("The film could not be loaded. Check that Burden(2026).mp4 is next to this HTML file, then reload the page.");
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.altKey || event.ctrlKey || event.metaKey) return;
+        const key = event.key.toLowerCase();
+        if ((key === "y" || key === "n") && ["prompt-photo", "prompt-burden", "prompt-tw", "ending"].includes(state)) {
+          event.preventDefault();
+          const choice = key === "y" ? "yes" : "no";
+          document.querySelector("#" + state + " [data-choice='" + choice + "']").click();
+          return;
+        }
+        if (state === "playing" && [" ", "enter", "arrowleft", "arrowright", "home", "end"].includes(key)) {
+          event.preventDefault();
+        }
+      });
+
+      document.addEventListener("contextmenu", (event) => {
+        if (event.target === film || state === "playing") event.preventDefault();
+      });
+    })();
+  </script>
+</body>
+</html>
