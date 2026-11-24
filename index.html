@@ -420,6 +420,72 @@
     @media (prefers-reduced-motion: reduce) {
       .warning-title, .tw-line { animation: none; }
     }
+
+    .opening-copy {
+      max-width: 980px;
+      margin-top: 70px;
+      gap: 14px;
+    }
+    .opening-copy .body-copy { font-size: clamp(18px, 2.03vw, 26px); }
+    .opening-copy .accept {
+      margin-top: clamp(24px, 5.5vh, 40px);
+    }
+    .prompt-copy {
+      max-width: 980px;
+      gap: clamp(12px, 2vh, 22px);
+    }
+    .prompt-copy .body-copy {
+      font-size: clamp(24px, 2.81vw, 36px);
+      line-height: 1.3;
+    }
+    .prompt-tw-copy {
+      max-width: 1000px;
+      gap: clamp(14px, 2vh, 22px);
+    }
+    .prompt-tw-copy .tw-line {
+      font-size: clamp(36px, 4.22vw, 54px);
+      line-height: 1.15;
+    }
+    .prompt-tw-copy .continue-label {
+      margin-top: 10px;
+    }
+    .statement-copy {
+      max-width: 1000px;
+      margin-top: 60px;
+      gap: 22px;
+    }
+    .statement-copy .body-copy,
+    .closing-copy .body-copy {
+      font-size: clamp(24px, 2.5vw, 32px);
+      line-height: 1.4;
+    }
+    .closing-copy {
+      max-width: 900px;
+      gap: 22px;
+    }
+    .repeat-copy {
+      margin-top: 60px;
+      gap: 12px;
+    }
+    .repeat-copy .repeat-line,
+    .repeat-copy .repeat-danger {
+      margin: 0;
+      font-size: clamp(28px, 3.12vw, 40px);
+      line-height: 1.2;
+      font-weight: 700;
+    }
+    .repeat-copy .repeat-danger {
+      color: #ff2b2b;
+      text-shadow: 2px 0 rgba(255,0,0,.55),
+                   -1px 0 rgba(255,120,120,.3),
+                   0 0 14px rgba(255,30,30,.75),
+                   0 0 28px rgba(255,0,0,.35);
+    }
+    .repeat-copy .repeat-question {
+      margin: 56px 0 0;
+      font-size: clamp(27px, 2.81vw, 36px);
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -436,20 +502,17 @@
     <section class="screen active" id="opening" aria-labelledby="warning-title">
       <div class="content opening-copy">
         <h1 class="warning-title line" id="warning-title" style="--delay:0s">WARNING</h1>
-        <p class="body-copy glow line" style="--delay:.15s">This experience contains depictions of human suffering and psychological trauma.</p>
-        <p class="body-copy glow line" style="--delay:.3s">Each step forward requires your consent.</p>
-        <p class="body-copy glow line" style="--delay:.45s">You are responsible for what you choose to see.</p>
-        <p class="body-copy glow line consent-copy" style="--delay:.65s">You are about to witness suffering.</p>
-        <p class="body-copy glow line" style="--delay:.8s">You will carry it.</p>
-        <button class="accept line" id="accept" type="button" style="--delay:1.1s">[ I ACCEPT ]</button>
+        <p class="body-copy glow line" style="--delay:1.8s">This experience contains depictions of human suffering and psychological trauma.</p>
+        <p class="body-copy glow line" style="--delay:4s">Each step forward requires your consent.</p>
+        <button class="accept line" id="accept" type="button" style="--delay:7s">[ I ACCEPT ]</button>
       </div>
     </section>
 
     <section class="screen" id="prompt-photo" aria-labelledby="photo-copy" aria-hidden="true">
-      <div class="content">
-        <p class="body-copy glow line" id="photo-copy" style="--delay:0s">You are about to witness the exploitation of a suffering child.</p>
-        <p class="continue-label glow line" style="--delay:.2s">Continue?</p>
-        <div class="choices line" role="group" aria-label="Continue or stop">
+      <div class="content prompt-copy">
+        <p class="body-copy glow line" id="photo-copy" style="--delay:.8s">You are about to witness the exploitation of a suffering child.</p>
+        <p class="continue-label glow line" style="--delay:4.5s">Continue?</p>
+        <div class="choices line" role="group" aria-label="Continue or stop" style="--delay:6.5s">
           <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">YES</button>
           <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">NO</button>
         </div>
@@ -457,10 +520,10 @@
     </section>
 
     <section class="screen" id="prompt-burden" aria-labelledby="burden-copy" aria-hidden="true">
-      <div class="content">
-        <p class="body-copy glow line" id="burden-copy" style="--delay:0s">You are about to witness the burden.</p>
-        <p class="continue-label glow line" style="--delay:.2s">Continue?</p>
-        <div class="choices line" role="group" aria-label="Continue or stop">
+      <div class="content prompt-copy">
+        <p class="body-copy glow line" id="burden-copy" style="--delay:.8s">You are about to witness the burden.</p>
+        <p class="continue-label glow line" style="--delay:4.5s">Continue?</p>
+        <div class="choices line" role="group" aria-label="Continue or stop" style="--delay:6.5s">
           <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">YES</button>
           <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">NO</button>
         </div>
@@ -468,21 +531,30 @@
     </section>
 
     <section class="screen" id="prompt-tw" aria-labelledby="tw-copy" aria-hidden="true">
-      <div class="content">
-        <p class="tw-line line" id="tw-copy" style="--delay:0s">TW: Contains death by suicide.</p>
-        <p class="continue-label glow line" style="--delay:.2s">Continue?</p>
-        <div class="choices line" role="group" aria-label="Continue or stop">
+      <div class="content prompt-tw-copy">
+        <p class="tw-line line" id="tw-copy" style="--delay:.8s">TW: Contains death by suicide.</p>
+        <p class="continue-label glow line" style="--delay:4.5s">Continue?</p>
+        <div class="choices line" role="group" aria-label="Continue or stop" style="--delay:6.5s">
           <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">YES</button>
           <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">NO</button>
         </div>
       </div>
     </section>
 
+    <section class="screen" id="ending-statement" aria-labelledby="ending-statement-copy" aria-hidden="true">
+      <div class="content statement-copy">
+        <p class="body-copy glow line" id="ending-statement-copy" style="--delay:1s">Every image you saw today was taken by someone who chose to keep looking.</p>
+        <p class="body-copy glow line" style="--delay:5s">Today, you chose to keep looking too.</p>
+      </div>
+    </section>
+
     <section class="screen" id="ending" aria-labelledby="ending-copy" aria-hidden="true">
-      <div class="content end-copy">
-        <p class="body-copy glow line" id="ending-copy" style="--delay:0s">Would you like to begin the cycle again?</p>
-        <p class="continue-label glow line" style="--delay:.2s">Continue?</p>
-        <div class="choices line" role="group" aria-label="Begin the cycle again or end">
+      <div class="content repeat-copy">
+        <p class="repeat-line glow line" id="ending-copy" style="--delay:1s">You chose to witness.</p>
+        <p class="repeat-line glow line" style="--delay:3.5s">You chose to consume.</p>
+        <p class="repeat-danger line" style="--delay:6.5s">You have taken part in the cycle.</p>
+        <p class="repeat-question glow line" style="--delay:10.5s">Repeat?</p>
+        <div class="choices line" role="group" aria-label="Repeat or end" style="--delay:12.5s">
           <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">YES</button>
           <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">NO</button>
         </div>
@@ -717,9 +789,13 @@
         if (state !== "playing") return;
         window.clearInterval(cutWatcher);
         film.classList.remove("is-playing");
-        state = "ending";
-        showScreen("ending", "Film complete. Choose whether to begin the cycle again.", "STOP");
-        document.querySelector("#ending [data-choice='yes']").focus();
+        state = "ending-statement";
+        showScreen("ending-statement", "Film complete. Ending statement.", "STOP");
+        resetTimer = window.setTimeout(() => {
+          state = "ending";
+          showScreen("ending", "Choose whether to repeat the cycle.", "STOP");
+          document.querySelector("#ending [data-choice='yes']").focus();
+        }, 8000);
       });
 
       film.addEventListener("error", () => {
