@@ -312,6 +312,114 @@
         scroll-behavior: auto !important;
       }
     }
+
+    /* Interface alignment with the BURDEN screen designs */
+    .brand { top: 5.55%; }
+    .brand-name {
+      font-family: "Courier New", monospace;
+      font-size: clamp(22px, 2.34vw, 30px);
+      letter-spacing: .18em;
+      text-shadow: 1.5px 0 rgba(255,0,60,.45),
+                   -1.5px 0 rgba(0,150,255,.45),
+                   0 0 9px rgba(255,255,255,.35);
+    }
+    .brand-tagline {
+      margin-top: 6px;
+      font-size: clamp(8px, 1.02vw, 13px);
+      letter-spacing: .32em;
+    }
+    .glow,
+    .body-copy.glow,
+    .continue-label.glow {
+      text-shadow: 1.5px 0 rgba(255,0,60,.45),
+                   -1.5px 0 rgba(0,150,255,.45),
+                   0 0 9px rgba(255,255,255,.35);
+    }
+    .warning-title,
+    .tw-line {
+      color: #ff2b2b;
+      font-family: "Courier New", monospace;
+      text-shadow: 2px 0 rgba(255,0,0,.55),
+                   -1px 0 rgba(255,120,120,.3),
+                   0 0 14px rgba(255,30,30,.75),
+                   0 0 28px rgba(255,0,0,.35);
+      animation: jit 3.5s infinite;
+    }
+    .screen .warning-title {
+      margin-bottom: 18px;
+      font-size: clamp(54px, 6.87vw, 88px);
+      line-height: 1;
+      letter-spacing: .04em;
+    }
+    .body-copy {
+      font-weight: 700;
+      font-size: clamp(18px, 2.03vw, 26px);
+      line-height: 1.35;
+    }
+    .opening-copy { gap: clamp(8px, 1.1vh, 14px); }
+    .opening-copy .body-copy { font-size: clamp(17px, 2.03vw, 26px); }
+    .opening-copy .consent-copy { margin-top: clamp(8px, 1.2vh, 14px); }
+    .continue-label,
+    .choice,
+    .accept {
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      letter-spacing: .12em;
+    }
+    .choice,
+    .accept {
+      min-height: 52px;
+      min-width: 116px;
+      padding: 10px 18px;
+      border: 0;
+      background: transparent;
+      color: #f2f2f2;
+      font-size: clamp(19px, 2.03vw, 26px);
+      text-shadow: 1.5px 0 rgba(255,0,60,.45),
+                   -1.5px 0 rgba(0,150,255,.45);
+    }
+    .choice::before,
+    .accept::before {
+      content: "\25B6  ";
+      opacity: 0;
+    }
+    .choice:hover::before,
+    .choice:focus-visible::before,
+    .accept:hover::before,
+    .accept:focus-visible::before {
+      opacity: 1;
+    }
+    .choice:hover,
+    .choice:focus-visible,
+    .accept:hover,
+    .accept:focus-visible {
+      outline: none;
+      background: #f2f2f2;
+      color: #000;
+      text-shadow: none;
+    }
+    .choices { gap: clamp(24px, 4vw, 52px); }
+    .crt {
+      opacity: .38;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 2px,
+          rgba(0,0,0,.32) 3px,
+          rgba(0,0,0,.32) 4px
+        );
+    }
+    .grain { opacity: .12; }
+    @keyframes jit {
+      0%,96%,100% { transform: translate(0,0); }
+      97% { transform: translate(-3px,0); }
+      98% { transform: translate(2px,1px); }
+      99% { transform: translate(-1px,0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .warning-title, .tw-line { animation: none; }
+    }
   </style>
 </head>
 <body>
@@ -333,7 +441,7 @@
         <p class="body-copy glow line" style="--delay:.45s">You are responsible for what you choose to see.</p>
         <p class="body-copy glow line consent-copy" style="--delay:.65s">You are about to witness suffering.</p>
         <p class="body-copy glow line" style="--delay:.8s">You will carry it.</p>
-        <button class="accept line" id="accept" type="button" style="--delay:1.1s">▶ [ I ACCEPT ]</button>
+        <button class="accept line" id="accept" type="button" style="--delay:1.1s">[ I ACCEPT ]</button>
       </div>
     </section>
 
@@ -342,8 +450,8 @@
         <p class="body-copy glow line" id="photo-copy" style="--delay:0s">You are about to witness the exploitation of a suffering child.</p>
         <p class="continue-label glow line" style="--delay:.2s">Continue?</p>
         <div class="choices line" role="group" aria-label="Continue or stop">
-          <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">▶ YES</button>
-          <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">▶ NO</button>
+          <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">YES</button>
+          <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">NO</button>
         </div>
       </div>
     </section>
@@ -353,8 +461,8 @@
         <p class="body-copy glow line" id="burden-copy" style="--delay:0s">You are about to witness the burden.</p>
         <p class="continue-label glow line" style="--delay:.2s">Continue?</p>
         <div class="choices line" role="group" aria-label="Continue or stop">
-          <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">▶ YES</button>
-          <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">▶ NO</button>
+          <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">YES</button>
+          <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">NO</button>
         </div>
       </div>
     </section>
@@ -364,8 +472,8 @@
         <p class="tw-line line" id="tw-copy" style="--delay:0s">TW: Contains death by suicide.</p>
         <p class="continue-label glow line" style="--delay:.2s">Continue?</p>
         <div class="choices line" role="group" aria-label="Continue or stop">
-          <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">▶ YES</button>
-          <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">▶ NO</button>
+          <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">YES</button>
+          <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">NO</button>
         </div>
       </div>
     </section>
@@ -375,8 +483,8 @@
         <p class="body-copy glow line" id="ending-copy" style="--delay:0s">Would you like to begin the cycle again?</p>
         <p class="continue-label glow line" style="--delay:.2s">Continue?</p>
         <div class="choices line" role="group" aria-label="Begin the cycle again or end">
-          <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">▶ YES</button>
-          <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">▶ NO</button>
+          <button class="choice" type="button" data-choice="yes" aria-keyshortcuts="Y">YES</button>
+          <button class="choice" type="button" data-choice="no" aria-keyshortcuts="N">NO</button>
         </div>
       </div>
     </section>
